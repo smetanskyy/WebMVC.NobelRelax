@@ -1,0 +1,46 @@
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using WebMVC.NobelRelax.Data.Constants;
+
+namespace WebMVC.NobelRelax.Data.Entities
+{
+    public class SeederDB
+    {
+        public static void SeedData(IServiceProvider services,
+            IWebHostEnvironment env, IConfiguration config)
+        {
+            using (var scope = services.GetRequiredService<IServiceScopeFactory>().CreateScope())
+            {
+                var manager = scope.ServiceProvider.GetRequiredService<UserManager<DbUser>>();
+                var managerRole = scope.ServiceProvider.GetRequiredService<RoleManager<DbRole>>();
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                
+                var result = managerRole.CreateAsync(new DbRole
+                {
+                    Name = Roles.Admin
+                }).Result;
+
+                result = managerRole.CreateAsync(new DbRole
+                {
+                    Name = Roles.User
+                }).Result;
+
+                string email = "admin@gmail.com";
+                var user = new DbUser
+                {
+                    Email = email,
+                    UserName = email,
+                    PhoneNumber = "+11(111)111-11-11"
+                };
+                result = manager.CreateAsync(user, "33Ki9x66-3of+s").Result;
+                result = manager.AddToRoleAsync(user, Roles.Admin).Result;
+            }
+        }
+    }
+}
